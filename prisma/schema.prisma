@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  auth0Id   String   @unique
+  email     String?  @unique
+  createdAt DateTime @default(now())
+  tickets   Ticket[]
+  demoAuth  DemoAuth[]
+}
+
+model Round {
+  id           Int      @id @default(autoincrement())
+  isActive     Boolean  @default(true)
+  drawnNumbers Int[]    @default([])
+  createdAt    DateTime @default(now())
+  tickets      Ticket[]
+}
+
+model Ticket {
+  id           String   @id @default(uuid())
+  idNumber     String   @db.VarChar(20)
+  selectedNums Int[]
+  qrCodeUrl    String?
+  roundId      Int
+  userId       String?
+  createdAt    DateTime @default(now())
+  round        Round    @relation(fields: [roundId], references: [id])
+  user         User?    @relation(fields: [userId], references: [id])
+}
+
+model DemoAuth {
+  id        String   @id @default(uuid())
+  userId    String? 
+  username  String   @unique
+  password  String   
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+}
